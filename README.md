@@ -4,17 +4,17 @@
 
 # 💬 fca-riyad
 
-### Unofficial Facebook Messenger Bot API for Node.js
+### Unofficial Facebook Messenger Bot API for Node.js — built for RIYAD BOT Framework
 **NEXCA Engine · Signal Protocol E2EE · sessionGuard · 90+ API Methods · Zero TypeScript**
 
 [![npm](https://img.shields.io/npm/v/fca-riyad?color=ff4785&label=npm&style=for-the-badge)](https://www.npmjs.com/package/fca-riyad)
 [![license](https://img.shields.io/badge/license-MIT-9b59b6?style=for-the-badge)](./LICENSE-MIT)
 [![node](https://img.shields.io/badge/node-%3E%3D18-2ecc71?style=for-the-badge)](https://nodejs.org)
 
-┌───────────────────────┐
-  [Features](#-features) • [Installation](#-installation) • [Quick Start](#-quick-start)  
-  [E2EE](#-e2ee--encrypted-conversations) • [sessionGuard](#-sessionguard) • [sendBroadcast](#-sendbroadcast) • [API Reference](#-api-reference) 
-└───────────────────────┘
+┌─────────────────────────────────────────────────────────┐
+│  [Features](#-features) • [Installation](#-installation) • [Quick Start](#-quick-start)  │
+│  [E2EE](#-e2ee--encrypted-conversations) • [sessionGuard](#-sessionguard) • [sendBroadcast](#-sendbroadcast) • [API Reference](#-api-reference) │
+└─────────────────────────────────────────────────────────┘
 
 </div>
 
@@ -32,7 +32,7 @@
 | ✅ | **`isActiveClient()` guard** — stale MQTT client events no longer processed |
 | ✅ | **`connectTimeout` extended** — no premature logout on slow networks |
 | ✅ | **autoReconnect** — auto-reconnect on connection drop |
-| ✅ | **GoatBot compatible** — all API signatures unchanged (`threadID` optional etc.) |
+| ✅ | **RIYAD BOT Framework native** — all API signatures built for it (`threadID` optional etc.) |
 | ✅ | **90+ API methods** — sendMessage, editMessage, setMessageReaction, getThreadInfo and more |
 
 ---
@@ -46,7 +46,7 @@
 - ✅ sendBroadcast — parallel/sequential multi-thread sending with rate limit
 - ✅ MessengerBot — Discord.js/Telegraf style (.command, .hears, .launch)
 - ✅ createFcaClient — namespaced facade (client.messages, client.threads etc.)
-- ✅ GoatBot / Mirai compatible — drop-in replacement
+- ✅ RIYAD BOT Framework native — built-in, drop-in ready
 
 ---
 
@@ -62,7 +62,7 @@ npm install fca-riyad
 
 ## 🚀 Quick Start
 
-### Classic (GoatBot compatible)
+### Classic (RIYAD BOT Framework)
 
 ```javascript
 const login = require("fca-riyad");
@@ -104,7 +104,7 @@ login({ appState: require("./account.json") }, { listenEvents: true }, async (er
 });
 ```
 
-### GoatBot login.js
+### RIYAD BOT Framework login.js
 
 ```javascript
 const login = require("fca-riyad");
