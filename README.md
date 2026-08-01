@@ -11,10 +11,10 @@
 [![license](https://img.shields.io/badge/license-MIT-9b59b6?style=for-the-badge)](./LICENSE-MIT)
 [![node](https://img.shields.io/badge/node-%3E%3D18-2ecc71?style=for-the-badge)](https://nodejs.org)
 
-┌─────────────────────────────────────────────────────────┐
-│  [Features](#-features) • [Installation](#-installation) • [Quick Start](#-quick-start)  │
-│  [E2EE](#-e2ee--encrypted-conversations) • [sessionGuard](#-sessionguard) • [sendBroadcast](#-sendbroadcast) • [API Reference](#-api-reference) │
-└─────────────────────────────────────────────────────────┘
+┌─────────────────────────┐
+  [Features](#-features) • [Installation](#-installation) • [Quick Start](#-quick-start)  
+  [E2EE](#-e2ee--encrypted-conversations) • [sessionGuard](#-sessionguard) • [sendBroadcast](#-sendbroadcast) • [API Reference](#-api-reference) 
+└─────────────────────────┘
 
 </div>
 
