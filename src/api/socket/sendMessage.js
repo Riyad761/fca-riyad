@@ -53,8 +53,21 @@ function extractIdsFromPayload(payload) {
     var messageID = null, threadID = null;
     function walk(node) {
         if (!Array.isArray(node)) return;
-        if (node[0] === 5 && (node[1] === "replaceOptimsiticMessage" || node[1] === "replaceOptimisticMessage")) {
-            messageID = String(node[3]);
+        if (node[0] === 5 && (
+            node[1] === "replaceOptimsiticMessage" ||
+            node[1] === "replaceOptimisticMessage" ||
+            node[1] === "insertMessage" ||
+            node[1] === "insertMessageRow" ||
+            node[1] === "insertNewMessageRange"
+        )) {
+            // messageID is usually node[3], but for insertMessage-style ops
+            // it can live inside the object at node[2].message_id / node[2].id
+            if (node[3] != null && (typeof node[3] === "string" || typeof node[3] === "number")) {
+                messageID = String(node[3]);
+            } else if (node[2] && typeof node[2] === "object") {
+                var cand = node[2].message_id || node[2].id || node[2].mid;
+                if (cand) messageID = String(cand);
+            }
         }
         if (node[0] === 5 && node[1] === "writeCTAIdToThreadsTable") {
             var candidate = node[2];
@@ -81,7 +94,16 @@ function publishLsRequestWithAck(mqttClient, content, requestId, timeout) {
                 if (String(data.request_id) === String(requestId)) {
                     clearTimeout(timer);
                     mqttClient.removeListener('message', onMessage);
-                    var extracted = extractIdsFromPayload(data.payload ? JSON.parse(data.payload) : {});
+                    var parsedForExtract = data.payload ? JSON.parse(data.payload) : {};
+                    var extracted = extractIdsFromPayload(parsedForExtract);
+                    if (!extracted.messageID) {
+                        // Debug aid: dump the raw step tree so we can see the real op
+                        // names Facebook is sending back for this thread/message type
+                        // (e.g. first-time DM / message-request threads can differ).
+                        try {
+                            logger.warn("sendMessage", "no messageID extracted, raw ls_resp payload: " + JSON.stringify(parsedForExtract).slice(0, 4000));
+                        } catch (_) { }
+                    }
                     resolve({ threadID: extracted.threadID, messageID: extracted.messageID });
                 }
             } catch (_) { }
