@@ -5,7 +5,7 @@ const pkg = require("../../package.json");
 
 function getLatestVersion(cb) {
   const req = https.get(
-    "https://registry.npmjs.org/fca-eryxenx/latest",
+    "https://registry.npmjs.org/fca-riyad/latest",
     { headers: { "Accept": "application/json" } },
     (res) => {
       let data = "";
@@ -36,9 +36,9 @@ function checkForUpdate(logger) {
     if (err || !latest) return;
     if (compareVersion(current, latest) < 0) {
       if (typeof logger === "function") {
-        logger(`⚠️ fca-eryxenx outdated! You are using v${current}, latest is v${latest}. Run: npm install fca-eryxenx@latest`, "warn");
+        logger(`⚠️ fca-riyad outdated! You are using v${current}, latest is v${latest}. Run: npm install fca-riyad@latest`, "warn");
       } else {
-        console.warn(`\x1b[33m[FCA-WARN] ⚠️ fca-eryxenx outdated! v${current} → v${latest} | npm install fca-eryxenx@latest\x1b[0m`);
+        console.warn(`\x1b[33m[FCA-WARN] ⚠️ fca-riyad outdated! v${current} → v${latest} | npm install fca-riyad@latest\x1b[0m`);
       }
     }
   });
