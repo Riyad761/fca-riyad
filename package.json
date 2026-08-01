@@ -1,7 +1,7 @@
 {
-  "name": "fca-eryxenx",
+  "name": "fca-riyad",
   "version": "37.0.0",
-  "description": "Facebook Chat API - Modified by EryXenX | Stable, Auto Re-login, Fixed setMessageReaction",
+  "description": "Facebook Chat API - Modified by Riyad | Stable, Auto Re-login, Fixed setMessageReaction",
   "main": "index.js",
   "types": "index.d.ts",
   "exports": {
@@ -29,7 +29,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/EryXenX/fca-eryxenx.git"
+    "url": "git+https://github.com/Riyad/fca-riyad.git"
   },
   "keywords": [
     "facebook",
@@ -39,17 +39,17 @@
     "bot",
     "unofficial",
     "fca",
-    "fca-eryxenx",
-    "eryxenx"
+    "fca-riyad",
+    "riyad"
   ],
   "author": {
-    "name": "EryXenX",
-    "url": "https://github.com/EryXenX"
+    "name": "Riyad",
+    "url": "https://github.com/Riyad"
   },
   "contributors": [
     {
-      "name": "EryXenX",
-      "url": "https://github.com/EryXenX"
+      "name": "Riyad",
+      "url": "https://github.com/Riyad"
     },
     {
       "name": "DongDev (Original)",
@@ -58,9 +58,9 @@
   ],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/EryXenX/fca-eryxenx/issues"
+    "url": "https://github.com/Riyad761/fca-riyad/issues"
   },
-  "homepage": "https://github.com/EryXenX/fca-eryxenx#readme",
+  "homepage": "https://github.com/Riyad761/fca-riyad#readme",
   "engines": {
     "node": ">=12.0.0"
   },
