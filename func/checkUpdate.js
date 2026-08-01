@@ -1,5 +1,5 @@
 "use strict";
-// Auto-update disabled in fca-eryxenx
+// Auto-update disabled in fca-riyad
 function checkAndUpdateVersion(callback) {
   if (typeof callback === "function") callback(null);
   return Promise.resolve();
