@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="./banner.png" alt="fca-riyad banner" width="100%" />
+<img src="./banner.jpg" alt="fca-riyad banner" width="100%" />
 
 # 💬 fca-riyad
 
