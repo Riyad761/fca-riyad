@@ -1,32 +1,39 @@
 <div align="center">
 
-# 💬 fca-eryxenx
+<img src="./banner.png" alt="fca-riyad banner" width="100%" />
 
-**Unofficial Facebook Messenger Bot API for Node.js**
-NEXCA Engine · Signal Protocol E2EE · sessionGuard · 90+ API Methods · Zero TypeScript
+# 💬 fca-riyad
 
-[![npm](https://img.shields.io/npm/v/fca-eryxenx?color=blue)](https://www.npmjs.com/package/fca-eryxenx)
-[![license](https://img.shields.io/badge/license-MIT-green)](./LICENSE-MIT)
-[![node](https://img.shields.io/badge/node-%3E%3D18-brightgreen)](https://nodejs.org)
+### Unofficial Facebook Messenger Bot API for Node.js
+**NEXCA Engine · Signal Protocol E2EE · sessionGuard · 90+ API Methods · Zero TypeScript**
 
-[Features](#-features) • [Installation](#-installation) • [Quick Start](#-quick-start) • [E2EE](#-e2ee--encrypted-conversations) • [sessionGuard](#-sessionguard) • [sendBroadcast](#-sendbroadcast) • [API Reference](#-api-reference)
+[![npm](https://img.shields.io/npm/v/fca-riyad?color=ff4785&label=npm&style=for-the-badge)](https://www.npmjs.com/package/fca-riyad)
+[![license](https://img.shields.io/badge/license-MIT-9b59b6?style=for-the-badge)](./LICENSE-MIT)
+[![node](https://img.shields.io/badge/node-%3E%3D18-2ecc71?style=for-the-badge)](https://nodejs.org)
+
+┌─────────────────────────────────────────────────────────┐
+│  [Features](#-features) • [Installation](#-installation) • [Quick Start](#-quick-start)  │
+│  [E2EE](#-e2ee--encrypted-conversations) • [sessionGuard](#-sessionguard) • [sendBroadcast](#-sendbroadcast) • [API Reference](#-api-reference) │
+└─────────────────────────────────────────────────────────┘
 
 </div>
 
 ---
 
-## ⚡ Why fca-eryxenx?
+## ⚡ Why fca-riyad?
 
-- ✅ **NEXCA Engine** — nexca MQTT, E2EE, sessionGuard core integrated
-- ✅ **Signal Protocol E2EE** — Facebook real encrypted conversations support
-- ✅ **sessionGuard** — appstate corruption and silent logout protection, auto-backup
-- ✅ **sendBroadcast** — rate-limited multi-thread broadcast
-- ✅ **Fixed MQTT subscribe race condition** — no more "Connection refused: No subscription existed"
-- ✅ **`isActiveClient()` guard** — stale MQTT client events no longer processed
-- ✅ **`connectTimeout` extended** — no premature logout on slow networks
-- ✅ **autoReconnect** — auto-reconnect on connection drop
-- ✅ **GoatBot compatible** — all API signatures unchanged (`threadID` optional etc.)
-- ✅ **90+ API methods** — sendMessage, editMessage, setMessageReaction, getThreadInfo and more
+| | |
+|---|---|
+| ✅ | **NEXCA Engine** — nexca MQTT, E2EE, sessionGuard core integrated |
+| ✅ | **Signal Protocol E2EE** — Facebook real encrypted conversations support |
+| ✅ | **sessionGuard** — appstate corruption and silent logout protection, auto-backup |
+| ✅ | **sendBroadcast** — rate-limited multi-thread broadcast |
+| ✅ | **Fixed MQTT subscribe race condition** — no more "Connection refused: No subscription existed" |
+| ✅ | **`isActiveClient()` guard** — stale MQTT client events no longer processed |
+| ✅ | **`connectTimeout` extended** — no premature logout on slow networks |
+| ✅ | **autoReconnect** — auto-reconnect on connection drop |
+| ✅ | **GoatBot compatible** — all API signatures unchanged (`threadID` optional etc.) |
+| ✅ | **90+ API methods** — sendMessage, editMessage, setMessageReaction, getThreadInfo and more |
 
 ---
 
@@ -46,10 +53,10 @@ NEXCA Engine · Signal Protocol E2EE · sessionGuard · 90+ API Methods · Zero 
 ## 📦 Installation
 
 ```bash
-npm install fca-eryxenx
+npm install fca-riyad
 ```
 
-Node.js >= 18 required.
+> Node.js >= 18 required.
 
 ---
 
@@ -58,7 +65,7 @@ Node.js >= 18 required.
 ### Classic (GoatBot compatible)
 
 ```javascript
-const login = require("fca-eryxenx");
+const login = require("fca-riyad");
 
 login({ appState: require("./account.json") }, { listenEvents: true }, (err, api) => {
   if (err) throw err;
@@ -100,7 +107,7 @@ login({ appState: require("./account.json") }, { listenEvents: true }, async (er
 ### GoatBot login.js
 
 ```javascript
-const login = require("fca-eryxenx");
+const login = require("fca-riyad");
 
 login({ appState }, options, async (err, api) => {
   if (err) return;
@@ -120,7 +127,7 @@ login({ appState }, options, async (err, api) => {
 
 ## 🔐 E2EE — Encrypted Conversations
 
-Uses Facebook's real Signal Protocol infrastructure — same as the official Messenger app.
+> Uses Facebook's real Signal Protocol infrastructure — same as the official Messenger app.
 
 ### Setup
 
@@ -162,7 +169,7 @@ await api.e2ee.disconnect();
 
 ## 🛡️ sessionGuard
 
-Protects your appstate from corruption and silent logouts.
+> Protects your appstate from corruption and silent logouts.
 
 ```javascript
 api.sessionGuard("./account.json");
@@ -174,11 +181,11 @@ api.sessionGuard("./account.json", {
 });
 ```
 
-What it does:
-- Auto-saves appstate every N minutes
-- Saves after every successful sendMessage (debounced)
-- Corruption guard — never overwrites a larger appstate with a smaller one
-- Auto-backup — writes `.bak` before every overwrite
+**What it does:**
+- 🔄 Auto-saves appstate every N minutes
+- 💾 Saves after every successful sendMessage (debounced)
+- 🛡️ Corruption guard — never overwrites a larger appstate with a smaller one
+- 📦 Auto-backup — writes `.bak` before every overwrite
 
 ```javascript
 api.saveSession();           // force save now
@@ -190,7 +197,7 @@ api.stopSessionGuard();      // stop the timer
 
 ## 📡 sendBroadcast
 
-Rate-limited multi-thread broadcast.
+> Rate-limited multi-thread broadcast.
 
 ```javascript
 const result = await api.sendBroadcast(
@@ -211,10 +218,10 @@ console.log(result.sent.length + "/" + result.total + " delivered");
 
 ## 🤖 MessengerBot
 
-Discord.js/Telegraf style high-level bot class.
+> Discord.js/Telegraf style high-level bot class.
 
 ```javascript
-const { createMessengerBot } = require("fca-eryxenx");
+const { createMessengerBot } = require("fca-riyad");
 
 const bot = await createMessengerBot(
   { appState: require("./account.json") },
@@ -232,10 +239,10 @@ await bot.launch({ stopOnSignals: true });
 
 ## 🎯 createFcaClient
 
-Namespaced facade grouping all API methods by domain.
+> Namespaced facade grouping all API methods by domain.
 
 ```javascript
-const { createFcaClient } = require("fca-eryxenx");
+const { createFcaClient } = require("fca-riyad");
 const client = createFcaClient(api);
 
 await client.messages.send("Hello!", threadID);
@@ -249,7 +256,8 @@ await client.account.refreshDtsg();
 
 ## 📖 API Reference
 
-### Sending Messages
+<details>
+<summary><b>💬 Sending Messages</b></summary>
 
 ```javascript
 api.sendMessage("Hello!", threadID);
@@ -267,8 +275,10 @@ api.sendFile("./doc.pdf", threadID);
 api.shareLink("https://github.com", threadID, "Check this!");
 api.shareContact("Meet my friend!", userID, threadID);
 ```
+</details>
 
-### Message Actions
+<details>
+<summary><b>✏️ Message Actions</b></summary>
 
 ```javascript
 api.editMessage("Updated text", messageID);
@@ -280,8 +290,10 @@ api.getMessage(threadID, messageID);
 api.forwardAttachment(attachmentID, [userID]);
 api.uploadAttachment([fs.createReadStream("photo.jpg")]);
 ```
+</details>
 
-### Read Receipts & Typing
+<details>
+<summary><b>👁️ Read Receipts & Typing</b></summary>
 
 ```javascript
 api.markAsRead(threadID);
@@ -290,8 +302,10 @@ api.markAsDelivered(threadID, messageID);
 api.markAsSeen();
 api.sendTypingIndicator(threadID, true);
 ```
+</details>
 
-### Thread Management
+<details>
+<summary><b>🧵 Thread Management</b></summary>
 
 ```javascript
 api.getThreadInfo(threadID);
@@ -304,8 +318,10 @@ api.changeArchivedStatus(threadID, true);
 api.handleMessageRequest(threadID, true);
 api.searchForThread("query");
 ```
+</details>
 
-### Thread Customization
+<details>
+<summary><b>🎨 Thread Customization</b></summary>
 
 ```javascript
 api.setTitle("New Name", threadID);
@@ -320,8 +336,10 @@ api.createPoll("Question?", threadID, { "Yes": false, "No": false });
 api.pinMessage(messageID, threadID);
 api.unpinMessage(messageID, threadID);
 ```
+</details>
 
-### User Info
+<details>
+<summary><b>👤 User Info</b></summary>
 
 ```javascript
 api.getUserInfo(userID);
@@ -338,8 +356,10 @@ api.followUser(userID);
 api.unfollowUser(userID);
 api.unfriend(userID);
 ```
+</details>
 
-### Social
+<details>
+<summary><b>📢 Social</b></summary>
 
 ```javascript
 api.reactToPost(postID, "love");
@@ -347,8 +367,10 @@ api.reactToComment(commentID, "haha");
 api.postComment(postID, "Great post!");
 api.sharePost(postID, "Check this!");
 ```
+</details>
 
-### Account & Config
+<details>
+<summary><b>⚙️ Account & Config</b></summary>
 
 ```javascript
 api.getCurrentUserID();
@@ -362,8 +384,10 @@ api.addExternalModule("myFunc", (defaultFuncs, api, ctx) => {
   };
 });
 ```
+</details>
 
-### HTTP Utilities
+<details>
+<summary><b>🌐 HTTP Utilities</b></summary>
 
 ```javascript
 api.httpGet(url, params, callback);
@@ -371,6 +395,7 @@ api.httpPost(url, form, callback);
 api.httpPostFormData(url, form, callback);
 api.uploadImageToImgbb(imageUrl);
 ```
+</details>
 
 ---
 
@@ -396,7 +421,7 @@ api.uploadImageToImgbb(imageUrl);
 
 MIT License
 
-**fca-eryxenx** by [EryXenX (Mohammad Akash)](https://github.com/EryXenX)
+**fca-riyad** by [Riyad](https://github.com/)
 NEXCA Engine by [Deku](https://github.com/dekuzxc) — MIT License
 
 > Unauthorized copying or redistribution without credit is prohibited.
@@ -405,6 +430,6 @@ NEXCA Engine by [Deku](https://github.com/dekuzxc) — MIT License
 
 <div align="center">
 
-Made with ❤️ by EryXenX
+Made with ❤️ by **Riyad**
 
 </div>
