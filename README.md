@@ -12,7 +12,7 @@
 [![node](https://img.shields.io/badge/node-%3E%3D18-2ecc71?style=for-the-badge)](https://nodejs.org)
 
 ┌───────────────────────┐
-│  [Features](#-features) • [Installation](#-installation) • [Quick Start](#-quick-start)  
+  [Features](#-features) • [Installation](#-installation) • [Quick Start](#-quick-start)  
   [E2EE](#-e2ee--encrypted-conversations) • [sessionGuard](#-sessionguard) • [sendBroadcast](#-sendbroadcast) • [API Reference](#-api-reference) 
 └───────────────────────┘
 
