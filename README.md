@@ -418,7 +418,7 @@ api.uploadImageToImgbb(imageUrl);
 
 MIT License
 
-**fca-riyad** by Riyad
+**fca-riyad** by [Riyad](https://github.com/Riyad761)
 NEXCA Engine by [Deku](https://github.com/dekuzxc) — MIT License
 
 > Unauthorized copying or redistribution without credit is prohibited.
