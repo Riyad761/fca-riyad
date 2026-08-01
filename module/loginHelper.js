@@ -1120,7 +1120,7 @@ function loginHelper(appState, Cookie, email, password, globalOptions, callback)
               logger(`Database connection failed: ${errorMsg}`, "warn");
             }
           });
-        logger("⚡ fca-eryxenx | Powered by EryXenX | github.com/EryXenX", "info");
+        logger("⚡ fca-riyad | Powered by Riyad | github.com/Riyad761", "info");
         const emitter = new EventEmitter();
         const ctxMain = {
           userID,
