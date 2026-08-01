@@ -16,8 +16,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - **sendBroadcast**: rate-limited multi-thread broadcast (`api.sendBroadcast(msg, threadIDs, opts)`)
 - **sendMessage**: nexca version (MQTT-first + HTTP fallback, better attachment handling)
 - **OldMessage**: nexca HTTP-only send, `sendMessageDM` shorthand
-- All fca-eryxenx API files preserved (GoatBot compatible signatures)
-- Copyright: fca-eryxenx v4.0.0 by EryXenX
+- All fca-riyad API files preserved (GoatBot compatible signatures)
+- Copyright: fca-riyad v4.0.0 by Riyad
 
 ---
 
