@@ -3540,10 +3540,14 @@ var FacebookGatewayService = class {
    * This uses the MAWCatQuery GraphQL document.
    */
   async fetchCAT(api) {
-    const fb_dtsg = api.fb_dtsg;
-    const userId = api.getCurrentUserID();
-    logger.debug("FacebookGatewayService", "Fetching CAT via GraphQL...");
-    const resText = await api.httpPost("https://www.facebook.com/api/graphql/", {
+  const fb_dtsg = api.fb_dtsg;
+  const userId = api.getCurrentUserID();
+  logger.debug("FacebookGatewayService", "Fetching CAT via GraphQL...");
+  // TEMP DEBUG — full visibility into why the CAT GraphQL call is failing
+  console.error("[E2EE DEBUG] fb_dtsg:", fb_dtsg, "| userId:", userId, "| typeof api.httpPost:", typeof api.httpPost);
+  let resText;
+  try {
+    resText = await api.httpPost("https://www.facebook.com/api/graphql/", {
       fb_dtsg,
       variables: "{}",
       doc_id: "23999698219677129",
@@ -3552,7 +3556,15 @@ var FacebookGatewayService = class {
       __jssesw: "1",
       server_timestamps: "true"
     });
-    const cleanText = resText.replace("for (;;);", "").trim();
+  } catch (httpErr) {
+    console.error("[E2EE DEBUG] httpPost threw:", httpErr && httpErr.stack ? httpErr.stack : httpErr);
+    throw httpErr;
+  }
+  console.error("[E2EE DEBUG] resText type:", typeof resText, "| value (first 500 chars):", typeof resText === "string" ? resText.slice(0, 500) : resText);
+  if (typeof resText !== "string") {
+    throw new Error("CAT fetch: httpPost returned non-string response, see [E2EE DEBUG] logs above");
+  }
+  const cleanText = resText.replace("for (;;);", "").trim();
     let data;
     try {
       data = JSON.parse(cleanText);
