@@ -1,6 +1,6 @@
 /**
  * Create by Donix-VN (DongDev)
- * Modified by EryXenX
+ * Modified by Riyad
  * Don't change credit
  * Send a message using MQTT.
  * @param {string} text - The text of the message to send.

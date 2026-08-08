@@ -1,11 +1,11 @@
 <div align="center">
 
-# 💬 fca-eryxenx
+# 💬 fca-riyad
 
 **Unofficial Facebook Messenger Bot API for Node.js**
 NEXCA Engine · Signal Protocol E2EE · sessionGuard · 90+ API Methods · Zero TypeScript
 
-[![npm](https://img.shields.io/npm/v/fca-eryxenx?color=blue)](https://www.npmjs.com/package/fca-eryxenx)
+[![npm](https://img.shields.io/npm/v/fca-riyad?color=blue)](https://www.npmjs.com/package/fca-riyad)
 [![license](https://img.shields.io/badge/license-MIT-green)](./LICENSE-MIT)
 [![node](https://img.shields.io/badge/node-%3E%3D18-brightgreen)](https://nodejs.org)
 
@@ -15,7 +15,7 @@ NEXCA Engine · Signal Protocol E2EE · sessionGuard · 90+ API Methods · Zero 
 
 ---
 
-## ⚡ Why fca-eryxenx?
+## ⚡ Why fca-riyad?
 
 - ✅ **NEXCA Engine** — nexca MQTT, E2EE, sessionGuard core integrated
 - ✅ **Signal Protocol E2EE** — Facebook real encrypted conversations support
@@ -46,7 +46,7 @@ NEXCA Engine · Signal Protocol E2EE · sessionGuard · 90+ API Methods · Zero 
 ## 📦 Installation
 
 ```bash
-npm install fca-eryxenx
+npm install fca-riyad
 ```
 
 Node.js >= 18 required.
@@ -58,7 +58,7 @@ Node.js >= 18 required.
 ### Classic (GoatBot compatible)
 
 ```javascript
-const login = require("fca-eryxenx");
+const login = require("fca-riyad");
 
 login({ appState: require("./account.json") }, { listenEvents: true }, (err, api) => {
   if (err) throw err;
@@ -100,7 +100,7 @@ login({ appState: require("./account.json") }, { listenEvents: true }, async (er
 ### GoatBot login.js
 
 ```javascript
-const login = require("fca-eryxenx");
+const login = require("fca-riyad");
 
 login({ appState }, options, async (err, api) => {
   if (err) return;
@@ -214,7 +214,7 @@ console.log(result.sent.length + "/" + result.total + " delivered");
 Discord.js/Telegraf style high-level bot class.
 
 ```javascript
-const { createMessengerBot } = require("fca-eryxenx");
+const { createMessengerBot } = require("fca-riyad");
 
 const bot = await createMessengerBot(
   { appState: require("./account.json") },
@@ -235,7 +235,7 @@ await bot.launch({ stopOnSignals: true });
 Namespaced facade grouping all API methods by domain.
 
 ```javascript
-const { createFcaClient } = require("fca-eryxenx");
+const { createFcaClient } = require("fca-riyad");
 const client = createFcaClient(api);
 
 await client.messages.send("Hello!", threadID);
@@ -396,7 +396,7 @@ api.uploadImageToImgbb(imageUrl);
 
 MIT License
 
-**fca-eryxenx** by [EryXenX (Mohammad Akash)](https://github.com/EryXenX)
+**fca-riyad** by [Riyad (Mohammad Akash)](https://github.com/Riyad)
 NEXCA Engine by [Deku](https://github.com/dekuzxc) — MIT License
 
 > Unauthorized copying or redistribution without credit is prohibited.
@@ -405,6 +405,6 @@ NEXCA Engine by [Deku](https://github.com/dekuzxc) — MIT License
 
 <div align="center">
 
-Made with ❤️ by EryXenX
+Made with ❤️ by Riyad
 
 </div>

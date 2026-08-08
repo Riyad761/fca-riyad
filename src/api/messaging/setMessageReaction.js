@@ -5,7 +5,7 @@ const { generateOfflineThreadingID, getCurrentTimestamp } = require("../../utils
 
 module.exports = function (defaultFuncs, api, ctx) {
   return function setMessageReaction(reaction, messageID, threadID, callback, forceCustomReaction) {
-    // ✅ EryXenX Fix: threadID is now optional (backward compatible)
+    // ✅ Riyad Fix: threadID is now optional (backward compatible)
     if (typeof threadID === "function") {
       forceCustomReaction = callback;
       callback = threadID;
