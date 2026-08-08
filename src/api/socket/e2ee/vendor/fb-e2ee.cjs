@@ -8118,6 +8118,7 @@ var ClientController = class {
         } else if (node.tag === "failure") {
           noiseSocket.off("frame", onFrame);
           clearTimeout(timeout);
+          logger.error("E2EE", "Full failure node attrs:", JSON.stringify(node.attrs), "children:", JSON.stringify(node.content || node.children || null));
           reject(new Error(`Login failure: ${node.attrs.reason}`));
         }
       };

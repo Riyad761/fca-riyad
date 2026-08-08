@@ -1120,7 +1120,7 @@ function loginHelper(appState, Cookie, email, password, globalOptions, callback)
               logger(`Database connection failed: ${errorMsg}`, "warn");
             }
           });
-        logger("⚡ fca-riyad | Powered by Riyad | github.com/Riyad", "info");
+        logger("⚡ fca-riyad | Powered by Riyad | github.com/Riyad761", "info");
         const emitter = new EventEmitter();
         const ctxMain = {
           userID,
@@ -1281,7 +1281,7 @@ function loginHelper(appState, Cookie, email, password, globalOptions, callback)
         }
         // ✅ nexca core features register
         try {
-          const e2eeModule = require("../src/api/socket/e2ee");
+          const e2eeModule = require("../src/api/socket/e2ee/nativeBridge");
           api.e2ee = new e2eeModule.E2EEBridge(ctxMain, api, defaultFuncs);
           ctxMain.e2ee = api.e2ee;
           api.connectE2EE = (deviceStorePath) => api.e2ee.connect(deviceStorePath, ctxMain.userID);

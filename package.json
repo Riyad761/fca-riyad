@@ -1,6 +1,6 @@
 {
   "name": "fca-riyad",
-  "version": "37.1.0",
+  "version": "37.2.0",
   "description": "Facebook Chat API - Modified by Riyad | Stable, Auto Re-login, Fixed setMessageReaction",
   "main": "index.js",
   "types": "index.d.ts",
@@ -58,9 +58,9 @@
   ],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/Riyad/fca-riyad/issues"
+    "url": "https://github.com/Riyad761/fca-riyad/issues"
   },
-  "homepage": "https://github.com/Riyad/fca-riyad#readme",
+  "homepage": "https://github.com/Riyad761/fca-riyad#readme",
   "engines": {
     "node": ">=12.0.0"
   },
@@ -82,7 +82,9 @@
     "@noble/hashes": "^2.2.0",
     "@signalapp/libsignal-client": "0.70.0",
     "mime": "^3.0.0",
-    "protobufjs": "^8.4.0"
+    "protobufjs": "^8.4.0",
+    "koffi": "^3.0.2",
+    "yumi-json-bigint": "^1.0.0"
   },
   "devDependencies": {
     "eslint": "^8.50.0",
