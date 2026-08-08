@@ -65,9 +65,15 @@ function cookiesFromJar(ctx) {
     const out = {};
     let jar = [];
     try {
-        if (typeof ctx.jar.getCookiesSync === "function") {
+        // tough-cookie's CookieJar#getCookies() is async/callback-based and
+        // does NOT return an array synchronously — calling .forEach() on it
+        // throws "jar.forEach is not a function" and aborts the whole E2EE
+        // connect attempt every time. getCookiesSync() is the correct
+        // synchronous accessor (same one src/utils/cookies.js already uses),
+        // so prefer it and only fall back to getCookies() if it's missing.
+        if (ctx && ctx.jar && typeof ctx.jar.getCookiesSync === "function") {
             jar = ctx.jar.getCookiesSync("https://www.facebook.com");
-        } else {
+        } else if (ctx && ctx.jar && typeof ctx.jar.getCookies === "function") {
             jar = ctx.jar.getCookies("https://www.facebook.com");
         }
     } catch (_) {}
