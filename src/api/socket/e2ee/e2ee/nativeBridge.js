@@ -64,8 +64,16 @@ async function loadNativeClient() {
 function cookiesFromJar(ctx) {
     const out = {};
     let jar = [];
-    try { jar = ctx.jar.getCookies("https://www.facebook.com"); } catch (_) {}
-    jar.forEach((c) => { if (c && c.key) out[c.key] = c.value; });
+    try {
+        if (typeof ctx.jar.getCookiesSync === "function") {
+            jar = ctx.jar.getCookiesSync("https://www.facebook.com");
+        } else {
+            jar = ctx.jar.getCookies("https://www.facebook.com");
+        }
+    } catch (_) {}
+    if (Array.isArray(jar)) {
+        jar.forEach((c) => { if (c && c.key) out[c.key] = c.value; });
+    }
     if (!out.c_user && out.i_user) out.c_user = out.i_user;
     return out;
 }
