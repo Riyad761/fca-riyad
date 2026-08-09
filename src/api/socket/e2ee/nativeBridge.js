@@ -61,11 +61,27 @@ async function loadNativeClient() {
     return mod.Client;
 }
 
-function cookiesFromJar(ctx) {
+async function cookiesFromJar(ctx) {
     const out = {};
     let jar = [];
-    try { jar = ctx.jar.getCookies("https://www.facebook.com"); } catch (_) {}
-    jar.forEach((c) => { if (c && c.key) out[c.key] = c.value; });
+    try {
+        if (ctx && ctx.jar && typeof ctx.jar.getCookiesSync === "function") {
+            jar = ctx.jar.getCookiesSync("https://www.facebook.com");
+        } else if (ctx && ctx.jar && typeof ctx.jar.getCookies === "function") {
+            jar = await ctx.jar.getCookies("https://www.facebook.com");
+        }
+    } catch (_) {}
+
+    if (Array.isArray(jar)) {
+        jar.forEach((c) => {
+            if (c && (c.key || c.name)) out[c.key || c.name] = c.value;
+        });
+    } else if (jar && typeof jar === "object") {
+        // Also accept an already-normalized cookie object.
+        for (const [key, value] of Object.entries(jar)) {
+            if (value != null && typeof value !== "object") out[key] = String(value);
+        }
+    }
     if (!out.c_user && out.i_user) out.c_user = out.i_user;
     return out;
 }
@@ -173,7 +189,7 @@ class NativeE2EEBridge {
     async _doConnect(deviceStorePath, userId) {
         const Client = await loadNativeClient();
 
-        const cookies = cookiesFromJar(this.ctx);
+        const cookies = await cookiesFromJar(this.ctx);
         if (!cookies.c_user || !cookies.xs) {
             throw new Error("Cannot start native E2EE: c_user/xs cookies missing from appState.");
         }
@@ -198,37 +214,63 @@ class NativeE2EEBridge {
     }
 
     async _mapIncomingMessage(ev) {
-        const text = ev && ev.text ? String(ev.text) : "";
-        const senderJidRaw = ev.senderId != null ? String(ev.senderId) : "";
+        const textValue = ev && (ev.text ?? ev.body ?? ev.message ?? ev.content);
+        const text = textValue != null ? String(textValue) : "";
+        const senderJidRaw = String(ev && (ev.senderId ?? ev.senderID ?? ev.from ?? ""));
+        const senderJid = String(senderJidRaw);
         const senderID = senderJidRaw.match(/^(\d+)/)?.[1] || senderJidRaw;
-        const threadID = ev && ev.chatJid ? String(ev.chatJid) : (ev && ev.threadId != null ? String(ev.threadId) : "");
-        const messageID = ev.id != null ? String(ev.id) : String(ev.id || Date.now());
+        const chatValue = ev && (ev.chatJid ?? ev.threadId ?? ev.threadID ?? ev.chatId);
+        const threadID = chatValue != null ? String(chatValue) : "";
+        const messageValue = ev && (ev.id ?? ev.messageId ?? ev.messageID);
+        const messageID = messageValue != null ? String(messageValue) : String(Date.now());
 
-        if (senderID) this._senderJidCache.set(messageID, ev.senderJid || senderJidRaw);
+        if (senderID) this._senderJidCache.set(messageID, ev.senderJid || senderJid);
 
         let messageReply = null;
         if (ev.replyTo) {
-            const rtId = ev.replyTo.messageId != null ? String(ev.replyTo.messageId) : (ev.replyTo.id != null ? String(ev.replyTo.id) : undefined);
-            const rtSenderRaw = ev.replyTo.senderId != null && typeof ev.replyTo.senderId !== "object" ? String(ev.replyTo.senderId) : "";
+            const rtIdValue = ev.replyTo.messageId ?? ev.replyTo.messageID ?? ev.replyTo.id;
+            const rtId = rtIdValue != null ? String(rtIdValue) : undefined;
+            const rtSenderValue = ev.replyTo.senderId ?? ev.replyTo.senderID ?? ev.replyTo.from;
+            const rtSenderRaw = rtSenderValue != null && typeof rtSenderValue !== "object"
+                ? String(rtSenderValue)
+                : "";
             const rtSenderID = rtSenderRaw.match(/^(\d+)/)?.[1] || rtSenderRaw;
             messageReply = {
                 messageID: rtId,
                 senderID: rtSenderID,
-                body: ev.replyTo.text != null ? String(ev.replyTo.text) : "",
+                body: ev.replyTo.text != null
+                    ? String(ev.replyTo.text)
+                    : (ev.replyTo.body != null ? String(ev.replyTo.body) : ""),
                 attachments: [],
                 isE2EE: true
             };
         }
 
         let attachments = [];
-        if (Array.isArray(ev.attachments) && ev.attachments.length && this.client) {
+        const rawAttachments = Array.isArray(ev && ev.attachments)
+            ? ev.attachments
+            : (ev && ev.attachment ? [ev.attachment] : []);
+        if (rawAttachments.length && this.client) {
             attachments = await Promise.all(
-                ev.attachments.map((a) => downloadAndExposeAttachment(this.client, a))
+                rawAttachments.map((a) => downloadAndExposeAttachment(this.client, a))
             );
         }
 
+        if (messageReply && this.client) {
+            const rawReplyAttachments = Array.isArray(ev.replyTo.attachments)
+                ? ev.replyTo.attachments
+                : (ev.replyTo.attachment ? [ev.replyTo.attachment] : []);
+            if (rawReplyAttachments.length) {
+                messageReply.attachments = await Promise.all(
+                    rawReplyAttachments.map((a) => downloadAndExposeAttachment(this.client, a))
+                );
+            }
+        }
+
         return {
-            type: "message",
+            // Riyad Bot's replyManager and attachment commands use this
+            // distinction.  Keep ordinary messages as "message".
+            type: messageReply ? "message_reply" : "message",
             senderID,
             body: text,
             threadID,
@@ -237,24 +279,27 @@ class NativeE2EEBridge {
             attachments,
             mentions: {},
             timestamp: ev.timestampMs != null ? Number(ev.timestampMs) : Date.now(),
-            isGroup: /@group\.facebook\.com$/i.test(ev.chatJid || ""),
+            isGroup: !!ev.isGroup || /(@g\.us|\.g\.|@group\.facebook\.com)$/i.test(threadID),
             isE2EE: true,
-            e2ee: { chatJid: ev.chatJid, senderJid: ev.senderJid || senderJidRaw, replyTo: ev.replyTo || null }
+            e2ee: { chatJid: threadID, senderJid: ev.senderJid || senderJid, replyTo: ev.replyTo || null }
         };
     }
 
     _mapIncomingReaction(ev) {
-        const messageID = ev.messageId != null ? String(ev.messageId) : (ev.id != null ? String(ev.id) : "");
-        const senderJidRaw = ev.senderId != null ? String(ev.senderId) : "";
+        const messageValue = ev.messageId ?? ev.messageID ?? ev.id;
+        const messageID = messageValue != null ? String(messageValue) : "";
+        const senderValue = ev.senderId ?? ev.senderID ?? ev.from ?? "";
+        const senderJidRaw = String(senderValue);
         const userID = senderJidRaw.match(/^(\d+)/)?.[1] || senderJidRaw;
-        const threadID = ev.chatJid != null ? String(ev.chatJid) : (ev.threadId != null ? String(ev.threadId) : "");
+        const chatValue = ev.chatJid ?? ev.threadId ?? ev.threadID ?? ev.chatId;
+        const threadID = chatValue != null ? String(chatValue) : "";
         return {
             type: "message_reaction",
             messageID,
             threadID,
             userID,
             senderID: userID,
-            reaction: ev.reaction || ev.emoji || "",
+            reaction: ev.reaction ?? ev.emoji ?? "",
             timestamp: ev.timestampMs != null ? Number(ev.timestampMs) : Date.now(),
             isE2EE: true
         };
@@ -323,7 +368,8 @@ class NativeE2EEBridge {
 
         const body = (msg && msg.body) || "";
         const rawAttachments = [];
-        if (msg && msg.attachment) rawAttachments.push(msg.attachment);
+        if (msg && Array.isArray(msg.attachment)) rawAttachments.push(...msg.attachment);
+        else if (msg && msg.attachment) rawAttachments.push(msg.attachment);
         if (msg && Array.isArray(msg.attachments)) rawAttachments.push(...msg.attachments);
 
         if (rawAttachments.length === 0) {
@@ -406,7 +452,19 @@ function guessMimeType(att, buffer) {
         ".mp3": "audio/mpeg", ".ogg": "audio/ogg", ".m4a": "audio/mp4", ".aac": "audio/aac",
         ".pdf": "application/pdf"
     };
-    const p = (att && att.path) || "";
+    if (att && typeof att.mimeType === "string" && att.mimeType.includes("/")) {
+        return att.mimeType;
+    }
+    if (att && typeof att.type === "string" && att.type.includes("/")) {
+        return att.type;
+    }
+    const p = (att && (att.path || att.filename || att.name)) || "";
+    if (att && typeof att.mimeType === "string" && att.mimeType.includes("/")) {
+        return att.mimeType;
+    }
+    if (att && typeof att.type === "string" && att.type.includes("/")) {
+        return att.type;
+    }
     const ext = path.extname(p).toLowerCase();
     if (extMap[ext]) return extMap[ext];
 
