@@ -115,6 +115,27 @@ function attachmentKind(mimeType) {
     return "file";
 }
 
+function mapIncomingMentions(ev) {
+    const source = ev && (ev.mentions ?? ev.mentionMap ?? ev.mentionedUsers);
+    const mentions = {};
+    if (Array.isArray(source)) {
+        for (const mention of source) {
+            if (!mention) continue;
+            const id = mention.id ?? mention.userId ?? mention.userID;
+            if (id != null) {
+                mentions[String(id)] = mention.text ?? mention.tag ?? mention.name ?? `@${id}`;
+            }
+        }
+    } else if (source && typeof source === "object") {
+        for (const [id, value] of Object.entries(source)) {
+            mentions[String(id)] = typeof value === "string"
+                ? value
+                : (value && (value.text ?? value.tag ?? value.name)) || `@${id}`;
+        }
+    }
+    return mentions;
+}
+
 async function downloadAndExposeAttachment(client, rawAtt) {
     try {
         const result = await client.downloadE2EEMedia({
@@ -277,7 +298,7 @@ class NativeE2EEBridge {
             messageID,
             messageReply,
             attachments,
-            mentions: {},
+            mentions: mapIncomingMentions(ev),
             timestamp: ev.timestampMs != null ? Number(ev.timestampMs) : Date.now(),
             isGroup: !!ev.isGroup || /(@g\.us|\.g\.|@group\.facebook\.com)$/i.test(threadID),
             isE2EE: true,
