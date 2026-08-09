@@ -71,19 +71,125 @@ async function cookiesFromJar(ctx) {
             jar = await ctx.jar.getCookies("https://www.facebook.com");
         }
     } catch (_) {}
-
     if (Array.isArray(jar)) {
         jar.forEach((c) => {
             if (c && (c.key || c.name)) out[c.key || c.name] = c.value;
         });
     } else if (jar && typeof jar === "object") {
-        // Also accept an already-normalized cookie object.
         for (const [key, value] of Object.entries(jar)) {
             if (value != null && typeof value !== "object") out[key] = String(value);
         }
     }
     if (!out.c_user && out.i_user) out.c_user = out.i_user;
     return out;
+}
+
+function normalizeJid(value) {
+    return value == null ? "" : String(value);
+}
+
+function numericId(value) {
+    const jid = normalizeJid(value);
+    return jid.match(/^(\d+)/)?.[1] || jid;
+}
+
+function readMessageText(ev) {
+    const value = ev && (ev.text ?? ev.body ?? ev.message ?? ev.content);
+    return value == null ? "" : String(value);
+}
+
+function readChatId(ev) {
+    const value = ev && (ev.chatJid ?? ev.threadId ?? ev.threadID ?? ev.chatId);
+    return value == null ? "" : String(value);
+}
+
+function readMessageId(ev) {
+    const value = ev && (ev.id ?? ev.messageId ?? ev.messageID);
+    return value == null ? String(Date.now()) : String(value);
+}
+
+function readSenderJid(ev) {
+    return normalizeJid(ev && (ev.senderId ?? ev.senderID ?? ev.from ?? ""));
+}
+
+function readAttachmentList(value) {
+    if (Array.isArray(value)) return value;
+    return value ? [value] : [];
+}
+
+function readReplySenderId(replyTo) {
+    const value = replyTo && (replyTo.senderId ?? replyTo.senderID ?? replyTo.from);
+    return value != null && typeof value !== "object" ? numericId(value) : "";
+}
+
+function readReplyText(replyTo) {
+    if (!replyTo) return "";
+    const value = replyTo.text ?? replyTo.body;
+    return value == null ? "" : String(value);
+}
+
+function isGroupChat(threadID, ev) {
+    return !!(ev && ev.isGroup) || /(@g\.us|\.g\.|@group\.facebook\.com)$/i.test(threadID);
+}
+
+function mapReply(ev) {
+    if (!ev || !ev.replyTo) return null;
+    const value = ev.replyTo.messageId ?? ev.replyTo.messageID ?? ev.replyTo.id;
+    return {
+        messageID: value != null ? String(value) : undefined,
+        senderID: readReplySenderId(ev.replyTo),
+        body: readReplyText(ev.replyTo),
+        attachments: [],
+        isE2EE: true
+    };
+}
+
+function mapReactionMessageId(ev) {
+    const value = ev && (ev.messageId ?? ev.messageID ?? ev.id);
+    return value == null ? "" : String(value);
+}
+
+function mapReactionChatId(ev) {
+    return readChatId(ev);
+}
+
+function mapReactionSenderId(ev) {
+    return numericId(ev && (ev.senderId ?? ev.senderID ?? ev.from ?? ""));
+}
+
+function mapReactionValue(ev) {
+    return ev && (ev.reaction ?? ev.emoji ?? "") || "";
+}
+
+function normalizeAttachmentMime(att) {
+    if (att && typeof att.mimeType === "string" && att.mimeType.includes("/")) {
+        return att.mimeType;
+    }
+    if (att && typeof att.type === "string" && att.type.includes("/")) {
+        return att.type;
+    }
+    return null;
+}
+
+function mapIncomingMentions(ev) {
+    const source = ev && (ev.mentions ?? ev.mentionMap ?? ev.mentionedUsers);
+    const mentions = {};
+    if (Array.isArray(source)) {
+        for (const mention of source) {
+            if (!mention) continue;
+            const id = mention.id ?? mention.userId ?? mention.userID;
+            if (id != null) {
+                mentions[String(id)] = mention.text ?? mention.tag ?? mention.name ?? `@${id}`;
+            }
+        }
+    } else if (source && typeof source === "object") {
+        for (const [id, value] of Object.entries(source)) {
+            mentions[String(id)] = typeof value === "string"
+                ? value
+                : (value && (value.text ?? value.tag ?? value.name)) || `@${id}`;
+        }
+    }
+    return mentions;
 }
 
 // ── local media cache dir + loopback URL, so decrypted E2EE media (which
@@ -189,7 +295,7 @@ class NativeE2EEBridge {
     async _doConnect(deviceStorePath, userId) {
         const Client = await loadNativeClient();
 
-        const cookies = await cookiesFromJar(this.ctx);
+        const cookies = cookiesFromJar(this.ctx);
         if (!cookies.c_user || !cookies.xs) {
             throw new Error("Cannot start native E2EE: c_user/xs cookies missing from appState.");
         }
@@ -217,7 +323,7 @@ class NativeE2EEBridge {
         const textValue = ev && (ev.text ?? ev.body ?? ev.message ?? ev.content);
         const text = textValue != null ? String(textValue) : "";
         const senderJidRaw = String(ev && (ev.senderId ?? ev.senderID ?? ev.from ?? ""));
-        const senderJid = String(senderJidRaw);
+        const senderJid = senderJidRaw;
         const senderID = senderJidRaw.match(/^(\d+)/)?.[1] || senderJidRaw;
         const chatValue = ev && (ev.chatJid ?? ev.threadId ?? ev.threadID ?? ev.chatId);
         const threadID = chatValue != null ? String(chatValue) : "";
@@ -268,8 +374,6 @@ class NativeE2EEBridge {
         }
 
         return {
-            // Riyad Bot's replyManager and attachment commands use this
-            // distinction.  Keep ordinary messages as "message".
             type: messageReply ? "message_reply" : "message",
             senderID,
             body: text,
@@ -277,7 +381,7 @@ class NativeE2EEBridge {
             messageID,
             messageReply,
             attachments,
-            mentions: {},
+            mentions: mapIncomingMentions(ev),
             timestamp: ev.timestampMs != null ? Number(ev.timestampMs) : Date.now(),
             isGroup: !!ev.isGroup || /(@g\.us|\.g\.|@group\.facebook\.com)$/i.test(threadID),
             isE2EE: true,
@@ -459,12 +563,6 @@ function guessMimeType(att, buffer) {
         return att.type;
     }
     const p = (att && (att.path || att.filename || att.name)) || "";
-    if (att && typeof att.mimeType === "string" && att.mimeType.includes("/")) {
-        return att.mimeType;
-    }
-    if (att && typeof att.type === "string" && att.type.includes("/")) {
-        return att.type;
-    }
     const ext = path.extname(p).toLowerCase();
     if (extMap[ext]) return extMap[ext];
 
