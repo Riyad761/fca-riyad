@@ -121,9 +121,11 @@ function mapIncomingMentions(ev) {
     if (Array.isArray(source)) {
         for (const mention of source) {
             if (!mention) continue;
-            const id = mention.id ?? mention.userId ?? mention.userID;
+            const id = mention.id ?? mention.userId ?? mention.userID ??
+                mention.uid ?? mention.fbid ?? mention.participant ?? mention.jid;
             if (id != null) {
-                mentions[String(id)] = mention.text ?? mention.tag ?? mention.name ?? `@${id}`;
+                const normalizedId = String(id).match(/^(\d+)/)?.[1] || String(id);
+                mentions[normalizedId] = mention.text ?? mention.tag ?? mention.name ?? `@${normalizedId}`;
             }
         }
     } else if (source && typeof source === "object") {
@@ -237,7 +239,7 @@ class NativeE2EEBridge {
     async _mapIncomingMessage(ev) {
         const textValue = ev && (ev.text ?? ev.body ?? ev.message ?? ev.content);
         const text = textValue != null ? String(textValue) : "";
-        const senderJidRaw = String(ev && (ev.senderId ?? ev.senderID ?? ev.from ?? ""));
+        const senderJidRaw = String(ev && (ev.senderJid ?? ev.senderId ?? ev.senderID ?? ev.from ?? ""));
         const senderJid = String(senderJidRaw);
         const senderID = senderJidRaw.match(/^(\d+)/)?.[1] || senderJidRaw;
         const chatValue = ev && (ev.chatJid ?? ev.threadId ?? ev.threadID ?? ev.chatId);
@@ -248,10 +250,20 @@ class NativeE2EEBridge {
         if (senderID) this._senderJidCache.set(messageID, ev.senderJid || senderJid);
 
         let messageReply = null;
-        if (ev.replyTo) {
-            const rtIdValue = ev.replyTo.messageId ?? ev.replyTo.messageID ?? ev.replyTo.id;
+        const rawReply = ev.replyTo || ev.messageReply || (
+            ev.replyToId || ev.replyToMessageId
+                ? {
+                    messageId: ev.replyToId || ev.replyToMessageId,
+                    senderId: ev.replyToSenderJid || ev.replyToSenderId,
+                    text: ev.replyToText,
+                    body: ev.replyToBody
+                }
+                : null
+        );
+        if (rawReply) {
+            const rtIdValue = rawReply.messageId ?? rawReply.messageID ?? rawReply.id;
             const rtId = rtIdValue != null ? String(rtIdValue) : undefined;
-            const rtSenderValue = ev.replyTo.senderId ?? ev.replyTo.senderID ?? ev.replyTo.from;
+            const rtSenderValue = rawReply.senderJid ?? rawReply.senderId ?? rawReply.senderID ?? rawReply.from;
             const rtSenderRaw = rtSenderValue != null && typeof rtSenderValue !== "object"
                 ? String(rtSenderValue)
                 : "";
@@ -260,8 +272,8 @@ class NativeE2EEBridge {
                 messageID: rtId,
                 senderID: rtSenderID,
                 body: ev.replyTo.text != null
-                    ? String(ev.replyTo.text)
-                    : (ev.replyTo.body != null ? String(ev.replyTo.body) : ""),
+                    ? String(rawReply.text)
+                    : (rawReply.body != null ? String(rawReply.body) : ""),
                 attachments: [],
                 isE2EE: true
             };
@@ -278,9 +290,9 @@ class NativeE2EEBridge {
         }
 
         if (messageReply && this.client) {
-            const rawReplyAttachments = Array.isArray(ev.replyTo.attachments)
-                ? ev.replyTo.attachments
-                : (ev.replyTo.attachment ? [ev.replyTo.attachment] : []);
+            const rawReplyAttachments = Array.isArray(rawReply.attachments)
+                ? rawReply.attachments
+                : (rawReply.attachment ? [rawReply.attachment] : []);
             if (rawReplyAttachments.length) {
                 messageReply.attachments = await Promise.all(
                     rawReplyAttachments.map((a) => downloadAndExposeAttachment(this.client, a))
@@ -307,9 +319,11 @@ class NativeE2EEBridge {
     }
 
     _mapIncomingReaction(ev) {
-        const messageValue = ev.messageId ?? ev.messageID ?? ev.id;
+        const messageValue = ev.messageId ?? ev.messageID ??
+            ev.targetMessageId ?? ev.targetMessageID ?? ev.targetId ??
+            ev.reactedMessageId ?? ev.reactedMessageID ?? ev.id;
         const messageID = messageValue != null ? String(messageValue) : "";
-        const senderValue = ev.senderId ?? ev.senderID ?? ev.from ?? "";
+        const senderValue = ev.senderJid ?? ev.senderId ?? ev.senderID ?? ev.from ?? "";
         const senderJidRaw = String(senderValue);
         const userID = senderJidRaw.match(/^(\d+)/)?.[1] || senderJidRaw;
         const chatValue = ev.chatJid ?? ev.threadId ?? ev.threadID ?? ev.chatId;
@@ -322,7 +336,8 @@ class NativeE2EEBridge {
             senderID: userID,
             reaction: ev.reaction ?? ev.emoji ?? "",
             timestamp: ev.timestampMs != null ? Number(ev.timestampMs) : Date.now(),
-            isE2EE: true
+            isE2EE: true,
+            e2ee: { chatJid: threadID, senderJid: String(senderValue) }
         };
     }
 
