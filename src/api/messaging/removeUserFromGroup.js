@@ -48,40 +48,13 @@ module.exports = function (defaultFuncs, api, ctx) {
       "request_id": reqID,
       "type": 3
     });
-    const handleRes = (topic, message) => {
-      if (topic !== "/ls_resp") return;
-      let jsonMsg;
-      try {
-        jsonMsg = JSON.parse(message.toString());
-        jsonMsg.payload = JSON.parse(jsonMsg.payload);
-      } catch (_) {
-        return;
-      }
-      if (jsonMsg.request_id !== reqID) return;
-      ctx.mqttClient.removeListener("message", handleRes);
-      const response = jsonMsg.payload;
-      if (response && (
-        response.success === false ||
-        response.error ||
-        response.errors ||
-        response.errorDescription ||
-        response.status === "error" ||
-        response.result === false
-      )) {
-        const err = response.error || response.errorDescription ||
-          new Error("Messenger rejected removing the member.");
-        callback(err);
-        return rejectFunc(err);
-      }
-      callback(null, true);
-      resolveFunc(true);
-    };
-    ctx.mqttClient.on("message", handleRes);
-    ctx.mqttClient.publish('/ls_req', form, (err) => {
+    ctx.mqttClient.publish('/ls_req', form, (err, data) => {
       if (err) {
-        ctx.mqttClient.removeListener("message", handleRes);
         callback(err, null);
         rejectFunc(err);
+      } else {
+        callback(null, true);
+        resolveFunc(true);
       }
     });
     return returnPromise;

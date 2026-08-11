@@ -52,32 +52,8 @@ module.exports = function (defaultFuncs, api, ctx) {
         }
         if (jsonMsg.request_id !== reqID) return;
         ctx.mqttClient.removeListener("message", handleRes);
-        const response = jsonMsg.payload;
-        const text = JSON.stringify(response || {});
-        const failed = response && (
-          response.success === false ||
-          response.error ||
-          response.errors ||
-          response.errorDescription ||
-          response.status === "error" ||
-          response.result === false ||
-          response.payload?.success === false ||
-          response.payload?.error
-        );
-        if (failed) {
-          const err = response.error || response.errorDescription ||
-            response.payload?.error || new Error("Messenger rejected adding the member.");
-          callback?.(err);
-          return reject(err);
-        }
-        if (!response || (typeof response !== "object" && !text)) {
-          const err = new Error("Messenger returned no add-member response.");
-          callback?.(err);
-          return reject(err);
-        }
-        const result = { success: true, response };
-        callback?.(null, result);
-        resolve(result);
+        callback?.(null, { success: true, response: jsonMsg.payload });
+        resolve({ success: true, response: jsonMsg.payload });
       };
       ctx.mqttClient.on("message", handleRes);
       ctx.mqttClient.publish("/ls_req", form, { qos: 1, retain: false }, (err) => {

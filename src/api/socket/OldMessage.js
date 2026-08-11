@@ -36,7 +36,7 @@ module.exports = function (defaultFuncs, api, ctx) {
 
     function getUrl(url, callback) {
         defaultFuncs.post("https://www.facebook.com/message_share_attachment/fromURI/", ctx.jar, {
-            uri: url
+            image_height: 960, image_width: 960, uri: url
         })
             .then(utils.parseAndCheckLogin(ctx, defaultFuncs))
             .then(resData => {

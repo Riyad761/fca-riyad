@@ -70,6 +70,8 @@ module.exports = function (defaultFuncs, api, ctx) {
 
   function getUrl(url, callback) {
     var form = {
+      image_height: 960,
+      image_width: 960,
       uri: url
     };
 
