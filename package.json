@@ -1,6 +1,6 @@
 {
   "name": "fca-riyad",
-  "version": "37.2.0",
+  "version": "37.2.4",
   "description": "Facebook Chat API - Modified by Riyad | Stable, Auto Re-login, Fixed setMessageReaction",
   "main": "index.js",
   "types": "index.d.ts",
