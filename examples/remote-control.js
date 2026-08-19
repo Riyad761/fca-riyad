@@ -11,7 +11,7 @@
 // }
 
 const fs = require("fs");
-const login = require("@dongdev/fca-unofficial");
+const login = require("../index");
 
 function loadAppState() {
   try {
