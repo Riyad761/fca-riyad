@@ -6,16 +6,49 @@ const log = require("../../../func/logAdapter");
 module.exports = function (defaultFuncs, api, ctx) {
   return function changeNickname(nickname, threadID, participantID, callback) {
     return new Promise((resolve, reject) => {
+      let settled = false;
+      let timeout;
+      const finish = (error, data) => {
+        if (settled) return;
+        settled = true;
+        if (timeout) clearTimeout(timeout);
+        ctx.mqttClient?.removeListener("message", onResponse);
+        if (error) {
+          callback?.(error);
+          reject(error);
+          return;
+        }
+        callback?.(null, data);
+        resolve(data);
+      };
+
+      const onResponse = (topic, message) => {
+        if (topic !== "/ls_resp") return;
+        let jsonMsg;
+        try {
+          jsonMsg = JSON.parse(message.toString());
+          jsonMsg.payload = JSON.parse(jsonMsg.payload);
+        } catch {
+          return;
+        }
+        if (jsonMsg.request_id !== reqID) return;
+        if (jsonMsg.payload?.error || jsonMsg.payload?.errors) {
+          finish(new Error(jsonMsg.payload.error || "MQTT request failed"));
+          return;
+        }
+        finish(null, { success: true, response: jsonMsg.payload });
+      };
+
       if (!ctx.mqttClient) {
-        const err = new Error("Not connected to MQTT");
-        callback?.(err);
-        return reject(err);
+        finish(new Error("Not connected to MQTT"));
+        return;
       }
       if (!threadID || !participantID) {
-        const err = new Error("Missing required parameters");
-        callback?.(err);
-        return reject(err);
+        finish(new Error("Missing required parameters"));
+        return;
       }
+      if (typeof ctx.wsReqNumber !== "number") ctx.wsReqNumber = 0;
+      if (typeof ctx.wsTaskNumber !== "number") ctx.wsTaskNumber = 0;
       const reqID = ++ctx.wsReqNumber;
       const taskID = ++ctx.wsTaskNumber;
       const payload = {
@@ -42,27 +75,15 @@ module.exports = function (defaultFuncs, api, ctx) {
         request_id: reqID,
         type: 3
       };
-      const onResponse = (topic, message) => {
-        if (topic !== "/ls_resp") return;
-        let jsonMsg;
-        try {
-          jsonMsg = JSON.parse(message.toString());
-          jsonMsg.payload = JSON.parse(jsonMsg.payload);
-        } catch (err) {
-          return;
-        }
-        if (jsonMsg.request_id !== reqID) return;
-        ctx.mqttClient.removeListener("message", onResponse);
-        callback?.(null, { success: true, response: jsonMsg.payload });
-        return resolve({ success: true, response: jsonMsg.payload });
-      };
+
       ctx.mqttClient.on("message", onResponse);
+      timeout = setTimeout(() => {
+        finish(new Error(`MQTT request ${reqID} timed out`));
+      }, 15000);
       ctx.mqttClient.publish("/ls_req", JSON.stringify(request), { qos: 1, retain: false }, (err) => {
         if (err) {
-          ctx.mqttClient.removeListener("message", onResponse);
           log.error("changeNicknameMqtt", err);
-          callback?.(err);
-          return reject(err);
+          finish(err);
         }
       });
     });
