@@ -337,7 +337,19 @@ async function singleUpload(urlBase, file, ua, tokens, retries = 2) {
 
 module.exports = function (defaultFuncs, api, ctx) {
   const ua = ctx?.options?.userAgent || DEFAULT_UA;
-  cookieJar = ctx.jar instanceof CookieJar ? ctx.jar : new CookieJar();
+  // Reuse ctx.jar whenever it looks usable (duck-typed) rather than a
+  // strict `instanceof CookieJar` check. If this file's own
+  // require("tough-cookie") resolves to a *different* installed copy of
+  // the package than the one used to build ctx.jar during login (common
+  // with npm's nested dependency resolution), `instanceof` silently fails
+  // even though ctx.jar is a perfectly valid, cookie-populated jar - and
+  // this file would fall back to a brand-new, permanently empty jar for
+  // every single attachment upload. Text sends and reactions never go
+  // through this file (they use ctx.mqttClient instead), which is why
+  // only attachments were affected.
+  cookieJar = (ctx.jar && typeof ctx.jar.getCookies === "function" && typeof ctx.jar.setCookie === "function")
+    ? ctx.jar
+    : (ctx.jar instanceof CookieJar ? ctx.jar : new CookieJar());
 
   // Axios instance
   http = wrapper(axios.create({
