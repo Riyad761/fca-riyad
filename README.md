@@ -3,18 +3,21 @@
 <img src="./banner.jpg" alt="fca-riyad banner" width="100%" />
 
 # 💬 fca-riyad
+
 ### 🚀 The Ultimate Unofficial Facebook Messenger Bot API for Node.js
 **NEXCA Engine · Signal Protocol · sessionGuard · 90+ API Methods**
 
 <br>
 
-<h1 align="center">
-  <kbd>🔒 E2EE SUPPORTED 🔒</kbd>
-</h1>
-<h3 align="center">
-  <b>Real End-to-End Encryption (Signal Protocol)</b><br>
-  <i>Chat with absolute privacy, exactly like the official Messenger App!</i>
-</h3>
+<div align="center">
+  <h1>
+    <kbd> 🔒 E2EE SUPPORTED 🔒 </kbd>
+  </h1>
+  <h3>
+    <b>Real End-to-End Encryption (Signal Protocol)</b><br>
+    <i>Chat with absolute privacy, exactly like the official Messenger App!</i>
+  </h3>
+</div>
 
 <br>
 
