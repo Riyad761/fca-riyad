@@ -1,0 +1,4 @@
+src/vendor/fca-unofficial/src/portedProfileAndSearch.js — added safe profile, friend, sticker, and search API ports.
+src/vendor/fca-unofficial/src/portedSocial.js — added isolated post, comment, post-reaction, and story interaction ports.
+src/vendor/fca-unofficial/index.js — registered the isolated ported API methods without changing existing transport wiring.
+index.d.ts — added TypeScript declarations for the new API methods and result types.

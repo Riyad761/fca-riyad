@@ -127,6 +127,8 @@ declare module '@dongdev/fca-unofficial' {
     changeGroupImage: (image: ReadableStream, threadID: string, callback?: (err?: Error) => void) => Promise<void>;
     changeNickname: (nickname: string, threadID: string, participantID: string, callback?: (err?: Error) => void) => Promise<void>;
     changeThreadColor: (color: string, threadID: string, callback?: (err?: Error) => void) => Promise<void>;
+     setTheme: (threadID: string, themeFBID: string, callback?: (err?: Error, result?: { success: boolean; requests: number }) => void) => Promise<{ success: boolean; requests: number }>;
+     setThreadTheme: (threadID: string, themeFBID: string, callback?: (err?: Error, result?: { success: boolean; requests: number }) => void) => Promise<{ success: boolean; requests: number }>;
     changeThreadEmoji: (emoji: string | null, threadID: string, callback?: (err?: Error) => void) => Promise<void>;
     setTitle: (newTitle: string, threadID: string, callback?: (err?: Error) => void) => Promise<void>;
     deleteThread: (threadOrThreads: string | string[], callback?: (err?: Error) => void) => Promise<void>;
@@ -168,6 +170,20 @@ declare module '@dongdev/fca-unofficial' {
     getUserID: (name: string, callback?: (err: Error | null, obj: IFCAU_UserIDResponse) => void) => Promise<IFCAU_UserIDResponse>;
     getFriendsList: (callback?: (err: Error | null, friends: IFCAU_Friend[]) => void) => Promise<IFCAU_Friend[]>;
     getCurrentUserID: () => string;
+    searchFriends: (query: string, callback?: (err: Error | null, friends: IFCAU_SearchFriend[]) => void) => Promise<IFCAU_SearchFriend[]>;
+    searchStickers: (query?: string, callback?: (err: Error | null, stickers: IFCAU_Sticker[]) => void) => Promise<IFCAU_Sticker[]>;
+    suggestFriend: (count?: number, cursor?: string | null, callback?: (err: Error | null, result: IFCAU_FriendSuggestions) => void) => Promise<IFCAU_FriendSuggestions>;
+    sendFriendRequest: (userID: string, callback?: (err?: Error) => void) => Promise<void>;
+    changeName: (name: { first_name: string; middle_name?: string; last_name: string }, format?: "complete" | "standard" | "reversed", callback?: (err?: Error) => void) => Promise<void>;
+    changeUsername: (username: string, callback?: (err?: Error) => void) => Promise<void>;
+    changeCover: (image: ReadableStream, callback?: (err: Error | null, url: string | null) => void) => Promise<string | null>;
+    setActiveStatus: (active: boolean, callback?: (err: Error | null, result: any) => void) => Promise<any>;
+    setProfileLock: (enabled: boolean, callback?: (err: Error | null, result: any) => void) => Promise<any>;
+    setPostReaction: (postID: string, type: number | "unlike" | "like" | "heart" | "love" | "haha" | "wow" | "sad" | "angry", callback?: (err: Error | null, result: any) => void) => Promise<any>;
+    createPost: (message: string | { body?: string; groupID?: string }, callback?: (err: Error | null, result: any) => void) => Promise<any>;
+    createCommentPost: (postID: string, message: string, callback?: (err: Error | null, result: any) => void) => Promise<any>;
+    setStoryReaction: (storyID: string, reaction?: string | number, callback?: (err: Error | null, result: any) => void) => Promise<any>;
+    setStorySeen: (storyID: string, bucketID?: string, callback?: (err: Error | null, result: any) => void) => Promise<any>;
 
     // Utilities
     getAppState: () => any;
@@ -215,6 +231,39 @@ declare module '@dongdev/fca-unofficial' {
 
     // Auto-save AppState
     enableAutoSaveAppState: (options?: { filePath?: string; interval?: number; saveOnLogin?: boolean }) => () => void;
+  };
+
+  export type IFCAU_SearchFriend = {
+    userID: string;
+    name: string;
+    profilePicture?: string | null;
+    profileUrl?: string;
+    subtitle?: string;
+    cursor?: string;
+    friendshipStatus?: string;
+    gender?: string | null;
+    shortName?: string | null;
+  };
+
+  export type IFCAU_Sticker = {
+    id: string;
+    image?: any;
+    package?: { name?: string; id?: string };
+    label?: string;
+  };
+
+  export type IFCAU_FriendSuggestions = {
+    suggestions: Array<{
+      id: string;
+      name?: string;
+      url?: string;
+      friendshipStatus?: string;
+      profilePicture?: string | null;
+      mutualFriends?: string;
+      topMutualFriends?: any[];
+    }>;
+    hasNextPage: boolean;
+    endCursor: string | null;
   };
 
   // ============================================================================
