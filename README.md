@@ -14,8 +14,8 @@
     <kbd> 🔒 E2EE SUPPORTED 🔒 </kbd>
   </h1>
   <h3>
-    <b>Real End-to-End Encryption (Signal Protocol)</b><br>
-    <i>Chat with absolute privacy, exactly like the official Messenger App!</i>
+    <b>Real⚡End-to-End Encryption (Signal Protocol)</b><br>
+    <i>📨Chat with absolute privacy, exactly like the official Messenger App!</i>
   </h3>
 </div>
 
