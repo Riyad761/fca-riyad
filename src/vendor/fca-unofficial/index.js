@@ -216,6 +216,11 @@ function buildAPI(globalOptions, html, jar) {
     api[v] = require('./src/' + v)(defaultFuncs, api, ctx);
   });
 
+  // Safe, isolated feature ports from Maria FCA. These are added after the
+  // legacy surface so existing methods and transport state remain unchanged.
+  Object.assign(api, require("./src/portedProfileAndSearch")(defaultFuncs, api, ctx));
+  Object.assign(api, require("./src/portedSocial")(defaultFuncs, api, ctx));
+
   //Removing original `listen` that uses pull.
   //Map it to listenMqtt instead for backward compatibly.
   api.listen = api.listenMqtt;
